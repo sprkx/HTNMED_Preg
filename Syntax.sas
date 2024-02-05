@@ -228,7 +228,7 @@ data x.list_rx; set tmp_2 tmp_3; run;
 %IMPORT_TXT (path=E:\Data\Pregnancy\Gold_MBlink
 , filename=21_000464_PregReg
 , lib=a
-, data_name=Preg_gold
+, data_name=gold_preg
 , var_name_list=patid pregid babypatid pregnumber pregstart startsource pregend outcome
 , var_format_list=$20. $20. $20. $2. ddmmyy10. $1. ddmmyy10. $2. 
 , delimiter='09'x);
@@ -243,7 +243,7 @@ data x.list_rx; set tmp_2 tmp_3; run;
 , var_name_list=patid vmid gender yob mob marital famnum chsreg chsdate prescr capsup frd crd regstat reggap internal tod toreason deathdate accept
 , var_format_list=$20. $20. best1. best4. best2. best3. best20. best1. ddmmyy10. best3. best3. ddmmyy10. ddmmyy10. best2. best5. best2. ddmmyy10. best3. ddmmyy10. $1.
 );
-data a.patient_gold; set patient_1; run; 
+data a.gold_patient; set patient_1; run; 
 %DeleteDataset(lib=work, data_name=patient, n_stt=1, n_end=1);
 *Practice;
 %IMPORT_N (file_n_stt=1, file_n_end=1, lib_name=work, data_name=Practice
@@ -252,14 +252,14 @@ data a.patient_gold; set patient_1; run;
 , var_format_list=$5. best3. ddmmyy10. ddmmyy10.
 );
 proc sql;
-create table a.practice_gold as
+create table a.gold_practice as
 select *
 from practice_1
 where pracid not in (select gold_pracid from b.prac_migrt)
 ;quit;
 %DeleteDataset(lib=work, data_name=practice, n_stt=1, n_end=1);
 *Clinical;
-data a.clinical_gold; set x.mom_dx_g_1 - x.mom_dx_g_16; run;
+data a.gold_clinical; set x.mom_dx_g_1 - x.mom_dx_g_16; run;
 data 
 *Additional;
 %IMPORT_N (file_n_stt=1, file_n_end=3, lib_name=work, data_name=Additional
@@ -267,10 +267,10 @@ data
 , var_name_list=patid enttype adid data1 data2 data3 data4 data5 data6 data7 data8 data9 data10 data11 data12
 , var_format_list=$20. best5. $20. $20. $20. $20. $20. $20. $20. $20. $20. $20. $20. $20. $20. 
 );
-data a.additional_gold; set additional_1 - additional_3; run;
+data a.gold_additional; set additional_1 - additional_3; run;
 %DeleteDataset(lib=work, data_name=additional, n_stt=1, n_end=3);
 *Therapy;
-data a.therapy_gold; set x.mom_rx_g_1 - x.mom_rx_g_16; run;
+data a.gold_therapy; set x.mom_rx_g_1 - x.mom_rx_g_16; run;
 
 proc sql;
 create table tmp as
@@ -284,14 +284,14 @@ set tmp;
 drop enttype adid data3 -- data12; 
 rename data1=DBP data2=SBP;
 run;
-data x.bp_gold; set tmp_1; run;
+data x.gold_bp; set tmp_1; run;
 
 /*Aurum*/
 *PregRegister;
 %IMPORT_TXT (
 path=E:\Data\Pregnancy\Aurum_MBlink\23_002937_Type1_data, 
 filename=aurum_pregnancy_register_2022_05
-, lib=a, data_name=preg_aurum
+, lib=a, data_name=aurum_preg
 , var_name_list=patid	pregstart	pregend
 , var_format_list=$20. ddmmyy10. ddmmyy10.
 , delimiter='09'x
@@ -306,7 +306,7 @@ filename=aurum_pregnancy_register_2022_05
 , var_name_list=patid	pracid	usualgpstaffid	gender	yob	mob	emis_ddate	regstartdate	patienttypeid	regenddate	acceptable	cprd_ddate
 , var_format_list=$20. $5. $10. 3. 4. 2. ddmmyy10. ddmmyy10. $5. ddmmyy10. 1. ddmmyy10.
 );
-data a.patient_aurum; set patient_1; run; 
+data a.aurum_patient; set patient_1; run; 
 %DeleteDataset(lib=work, data_name=patient, n_stt=1, n_end=1);
 *Practice;
 %IMPORT_N (file_n_stt=1, file_n_end=1, lib_name=work, data_name=Practice
@@ -314,7 +314,7 @@ data a.patient_aurum; set patient_1; run;
 , var_name_list=pracid	lcd	uts	region
 , var_format_list=$5. ddmmyy10. ddmmyy10. 5.
 );
-data a.practice_aurum; set practice_1; run;
+data a.aurum_practice; set practice_1; run;
 %DeleteDataset(lib=work, data_name=practice, n_stt=1, n_end=1);
 *Observation;
 %IMPORT_N (file_n_stt=1, file_n_end=89, lib_name=work, data_name=observation
@@ -322,7 +322,7 @@ data a.practice_aurum; set practice_1; run;
 , var_name_list=patid	consid	pracid	obsid	obsdate	enterdate	staffid	parentobsid	medcodeid	value	numunitid	obstypeid	numrangelow	numrangehigh	probobsid
 , var_format_list=$20. $20. $5. $20. ddmmyy10. ddmmyy10. $20. $20. $20. 19.3 $10. $5. 19.3 19.3 $20.
 );
-data a.observation_aurum; set observation_1 - observation_89; run;
+data a.aurum_observation; set observation_1 - observation_89; run;
 %DeleteDataset(lib=work, data_name=observation, n_stt=1, n_end=89);
 *DrugIssue;
 %IMPORT_N (file_n_stt=1, file_n_end=29, lib_name=work, data_name=drug
@@ -330,7 +330,7 @@ data a.observation_aurum; set observation_1 - observation_89; run;
 , var_name_list=patid	issueid	pracid	probobsid	drugrecid	issuedate	enterdate	staffid	prodcodeid	dosageid	quantity	quantunitid	duration	estnhscost
 , var_format_list=$20. $20. $5. $20. $20. ddmmyy10. ddmmyy10. $10. $20. $64. 9.3 $2. 10. 10.4
 );
-data a.drug_aurum; set drug_1 - drug_29; run;
+data a.aurum_drug; set drug_1 - drug_29; run;
 %DeleteDataset(lib=work, data_name=drug, n_stt=1, n_end=29);
 
 data tmp_2;
@@ -352,10 +352,10 @@ data x.list_bp; set tmp_3; run;
 proc sql;
 create table tmp_4 as
 select distinct a.patid, a.pracid, a.obsid, a.obsdate, a.medcodeid, a.value, b.term, b.type_id
-from a.observation_aurum as a
+from a.aurum_observation as a
 inner join x.list_bp as b on a.medcodeid=b.medcodeid
 ;quit;
-data x.bp_aurum; set tmp_4; run;
+data x.aurum_bp; set tmp_4; run;
 
 /*********************/
 /* Study population  */
@@ -365,9 +365,11 @@ data x.bp_aurum; set tmp_4; run;
 proc sql;
 create table tmp_0 as
 select distinct a.*, b.gender, b.yob, b.accept, b.deathdate, b.tod, b.frd, c.lcd
-from a.preg_gold as a
-left join a.patient_gold as b on a.patid=b.patid
-left join a.practice_gold as c on (substr(a.patid, length(a.patid)-4, 5))=c.pracid
+from a.gold_preg as a
+left join a.gold_patient as b on a.patid=b.patid
+left join a.gold_practice as c on (substr(a.patid, length(a.patid)-4, 5))=c.pracid
+group by a.patid, a.pregstart
+having a.pregend=max(pregend)
 ;quit;
 data tmp_1;
 set tmp_0 (drop=babypatid);
@@ -378,20 +380,20 @@ if tod=. or pregstart+365.25 <= tod;
 if lcd=. or pregstart+365.25 <= lcd;
 if frd <= pregstart+365.25;
 if accept="1";
-run; *2095018;
-data x.incl_gold_0; set tmp_1; run;
+run;*2062345;
+data x.gold_incl_0; set tmp_1; run;
 proc sql;
 create table tmp_2 as
 select distinct a.*, b.eventdate, c.info, c.term
-from x.incl_gold_0 as a
-inner join a.clinical_gold as b on a.patid=b.patid
+from x.gold_incl_0 as a
+inner join a.gold_clinical as b on a.patid=b.patid
 	and a.pregstart-90 <= b.eventdate and b.eventdate <= a.pregstart
 inner join x.list_dx_htn as c on b.medcode=c.code and c.code_sys="gold"
 ;quit;
 proc sql;
 create table tmp_3 as
 select distinct a.*, b.info
-from x.incl_gold_0 as a
+from x.gold_incl_0 as a
 left join tmp_2 as b on a.patid=b.patid and a.pregid=b.pregid
 ;quit;
 /*proc freq data=tmp_3; table info; run;*/
@@ -399,16 +401,18 @@ data tmp_4;
 set tmp_3;
 if info^="" then preHTN=1; else preHTN=0;
 if mdy(1,1,2001)<=pregstart<=mdy(12,31,2021);
-run;*1327247;
-data x.cht_gold; set tmp_4; run;
+run;*1303919;
+data x.gold_cht; set tmp_4; run;
 
 /*aurum*/
 proc sql;
 create table tmp_5 as
 select distinct a.*, b.gender, b.yob, b.acceptable as accept, b.regstartdate, b.regenddate, c.lcd
-from a.preg_aurum as a
-left join a.patient_aurum as b on a.patid=b.patid
-left join a.practice_aurum as c on (substr(a.patid, length(a.patid)-4, 5))=c.pracid
+from a.aurum_preg as a
+left join a.aurum_patient as b on a.patid=b.patid
+left join a.aurum_practice as c on (substr(a.patid, length(a.patid)-4, 5))=c.pracid
+group by a.patid, a.pregstart
+having a.pregend=max(pregend)
 ;quit;
 data tmp_6;
 set tmp_5;
@@ -417,36 +421,36 @@ if regenddate=. or pregstart+365.25 <= regenddate;
 if lcd=. or pregstart+365.25 <= lcd;
 if regstartdate <= pregstart+365.25;
 if accept="1";
-run; *3779781;
-data x.incl_aurum_0; set tmp_6; run;
+run; *3745968;
+data x.aurum_incl_0; set tmp_6; run;
 proc sql;
 create table tmp_7 as
 select distinct a.*, b.obsdate as eventdate, c.info, c.term
-from x.incl_aurum_0 as a
-inner join a.observation_aurum as b on a.patid=b.patid
+from x.aurum_incl_0 as a
+inner join a.aurum_observation as b on a.patid=b.patid
 	and a.pregstart-90 <= b.obsdate and b.obsdate <= a.pregstart
 inner join x.list_dx_htn as c on b.medcodeid=c.code and c.code_sys="aurum"
 ;quit;
 proc sql;
 create table tmp_8 as
 select distinct a.*, b.info
-from x.incl_aurum_0 as a
+from x.aurum_incl_0 as a
 left join tmp_7 as b on a.patid=b.patid and a.pregstart=b.pregstart
 ;quit;
 data tmp_9;
 set tmp_8;
 if info^="" then preHTN=1; else preHTN=0;
 if mdy(1,1,2001)<=pregstart<=mdy(12,31,2021);
-run; *2864928;
+run; *2840091;
 proc freq data=tmp_9; table prehtn; run;
-data x.cht_aurum; set tmp_9; run;
+data x.aurum_cht; set tmp_9; run;
 
 **COV_BP:recent BP (within 180d);
 proc sql;
 create table bp_1 as
 select distinct a.*, b.eventdate, b.dbp, b.sbp
-from x.cht_gold as a
-left join x.bp_gold as b on a.patid=b.patid 
+from x.gold_cht as a
+left join x.gold_bp as b on a.patid=b.patid 
 		and a.pregstart-180 < b.eventdate and b.eventdate <= a.pregstart 
 group by a.patid
 having max(b.eventdate)=b.eventdate
@@ -466,14 +470,13 @@ if (140 <= SBP) or (90 <= DBP) then BP=4; *high BP stage 2;
 if SBP=. or DBP=. then BP=9; *missing;
 age=year(pregstart)-yob;
 run;
-proc freq data=bp_3; table bp*prehtn; run;
-data x.cht_bp_gold; set bp_3; run;
+/*proc freq data=bp_3; table bp*prehtn; run;*/
 
 proc sql;
 create table bp_4 as
 select distinct a.*, b.obsdate as eventdate, b.value, b.type_id
-from x.cht_aurum as a
-left join x.bp_aurum as b on a.patid=b.patid 
+from x.aurum_cht as a
+left join x.aurum_bp as b on a.patid=b.patid 
 		and a.pregstart-180 < b.obsdate and b.obsdate <= a.pregstart 
 group by a.patid
 having max(b.obsdate)=b.obsdate
@@ -501,71 +504,357 @@ if (140 <= SBP) or (90 <= DBP) then BP=4; *high BP stage 2;
 if SBP=. or DBP=. then BP=9; *missing;
 age=year(pregstart)-yob;
 run;
-proc freq data=bp_7; table bp*prehtn; run;
-data x.cht_bp_aurum; set bp_7; run;
+/*proc freq data=bp_7; table bp*prehtn; run;*/
+
+data tmp_1;
+set bp_7;
+db="aurum";
+run;
+data tmp_2;
+set bp_3;
+db="gold";
+drop pregid pregnumber;
+run;
+data x.cht_char1; set tmp_1 tmp_2; run;
 
 /**************************/
 /* Antihypertensive drugs */
 /**************************/
 
 proc sql;
-create table x.rx_htnmed_gold as
+create table x.gold_rx_htnmed as
 select a.*, b.*
-from a.therapy_gold as a
+from a.gold_therapy as a
 inner join x.list_rx as b on a.prodcode=b.code and b.code_sys="gold"
 ;quit;
 proc sql;
-create table x.rx_htnmed_aurum as
+create table x.aurum_rx_htnmed as
 select a.*, b.*
-from a.drug_aurum as a
+from a.aurum_drug as a
 inner join x.list_rx as b on a.prodcodeid=b.code and b.code_sys="aurum"
 ;quit;
 
+proc sql;
+create table tmp as
+select a.*, COALESCE(b.eventdate,c.issuedate) as rx_dt format yymmdd10.
+	, COALESCE(b.type_id, c.type_id) as type_id
+	, COALESCE(b.exp_id, c.exp_id) as exp_id
+	, COALESCE(b.info, c.info) as info
+	, COALESCE(b.ingr, c.ingr) as ingr
+from x.cht_char1 as a
+left join x.gold_rx_htnmed as b on a.patid=b.patid
+	and a.pregstart-365 <= b.eventdate and b.eventdate <= a.pregend+365
+	and a.db="gold"
+left join x.aurum_rx_htnmed as c on a.patid=c.patid
+	and a.pregstart-365 <= c.issuedate and c.issuedate <= a.pregend+365
+	and a.db="aurum"
+;quit;
+data x.rx_cht_htnmed; set tmp; run;
+
+data tmp;
+set x.rx_cht_htnmed;
+format rx_dt yymmdd10.;
+if pregstart-90 <= rx_dt and rx_dt <= pregstart-1 then pre_HTNMED=1; else pre_HTNMED=0;
+if pregstart <= rx_dt and rx_dt <= pregend then preg_HTNMED=1; else preg_HTNMED=0;
+if pregend+1 <= rx_dt and rx_dt <= pregend+90 then post_HTNMED=1; else post_HTNMED=0;
+run;
+%MACRO XXX;
 data tmp_1;
-set x.cht_bp_gold;
-format pre_stt_dt pre_end_dt tm1_stt_dt tm1_end_dt tm2_stt_dt tm2_end_dt tm3_stt_dt tm3_end_dt post_stt_dt post_end_dt yymmdd10.; 
-pre_stt_dt=pregstart-90;
-pre_end_dt=pregstart;
-tm1_stt_dt=pregstart+1;
-tm1_end_dt=pregstart+90;
-tm2_stt_dt=pregstart+91;
-tm2_end_dt=pregstart+180;
-tm3_stt_dt=pregstart+181;
-tm3_end_dt=pregend;
-post_stt_dt=pregend+1;
-post_end_dt=pregend+90;
+set tmp;
+if pregstart-90 <= rx_dt and rx_dt <= pregstart then do;
+%do a=1 %to 11;
+	if type_id="HMED_&a." then pre_HMED_&a.=1; else pre_HMED_&a.=0;
+%end; end;
+if pregstart+1 <= rx_dt and rx_dt <= pregend then do;
+%do b=1 %to 11;
+	if type_id="HMED_&b." then preg_HMED_&b.=1; else preg_HMED_&b.=0;
+%end; 
+	if exp_id="EXP_1" then preg_EXP_1=1; else preg_EXP_1=0;
+	if exp_id="EXP_2" then preg_EXP_2=1; else preg_EXP_2=0;
+	if exp_id="EXP_3" then preg_EXP_3=1; else preg_EXP_3=0;
+	if exp_id="EXP_4" then preg_EXP_4=1; else preg_EXP_4=0;
+	if exp_id="EXP_9" then preg_EXP_9=1; else preg_EXP_9=0;
+end;
+if pregend+1  <= rx_dt and rx_dt <= pregend+90 then do;
+%do c=1 %to 11;
+	if type_id="HMED_&c." then post_HMED_&c.=1; else post_HMED_&c.=0;
+%end; end;
 run;
+%MEND; %XXX;
+%MACRO XXX;
 data tmp_2;
-set x.cht_bp_aurum;
-format pre_stt_dt pre_end_dt tm1_stt_dt tm1_end_dt tm2_stt_dt tm2_end_dt tm3_stt_dt tm3_end_dt post_stt_dt post_end_dt yymmdd10.; 
-pre_stt_dt=pregstart-90;
-pre_end_dt=pregstart;
-tm1_stt_dt=pregstart+1;
-tm1_end_dt=pregstart+90;
-tm2_stt_dt=pregstart+91;
-tm2_end_dt=pregstart+180;
-tm3_stt_dt=pregstart+181;
-tm3_end_dt=pregend;
-post_stt_dt=pregend+1;
-post_end_dt=pregend+90;
+set tmp_1;
+if pregstart+1 <= rx_dt and rx_dt <= pregend then do;
+
+if pregstart+1 <= rx_dt and rx_dt <= pregstart+90 then do; TM1_HMED=1;
+%do a=1 %to 11;	if type_id="HMED_&a." then TM1_HMED_&a.=1; else TM1_HMED_&a.=0; %end; 
+%do b=1 %to 4; if exp_id="EXP_&b." then TM1_EXP_&b.=1; else TM1_EXP_&b.=0; %end;
+if exp_id="EXP_9" then TM1_EXP_9=1; else TM1_EXP_9=0;
+end;
+else TM1_HMED=0;
+
+if pregstart+91 <= rx_dt and rx_dt <= pregstart+180 then do; TM2_HMED=1;
+%do a=1 %to 11;	if type_id="HMED_&a." then TM2_HMED_&a.=1; else TM2_HMED_&a.=0; %end; 
+%do b=1 %to 4; if exp_id="EXP_&b." then TM2_EXP_&b.=1; else TM2_EXP_&b.=0; %end;
+if exp_id="EXP_9" then TM2_EXP_9=1; else TM2_EXP_9=0;
+end;
+else TM2_HMED=0;
+
+
+if pregstart+181 <= rx_dt and rx_dt <= pregend then do; TM3_HMED=1;
+%do a=1 %to 11;	if type_id="HMED_&a." then TM3_HMED_&a.=1; else TM3_HMED_&a.=0; %end; 
+%do b=1 %to 4; if exp_id="EXP_&b." then TM3_EXP_&b.=1; else TM3_EXP_&b.=0; %end;
+if exp_id="EXP_9" then TM3_EXP_9=1; else TM3_EXP_9=0;
+end;
+else TM3_HMED=0;
+
+end;
+run;
+%MEND; %XXX;
+
+%MACRO XXX;
+proc sql;
+create table tmp_3 as
+select distinct patid, pregstart, pregend, yob, prehtn, bp, age, db
+	, max(pre_htnmed) as pre_hmed, max(preg_htnmed) as preg_hmed, max(post_htnmed) as post_hmed
+	, max(tm1_hmed) as tm1_hmed, max(tm2_hmed) as tm2_hmed, max(tm3_hmed) as tm3_hmed
+%do a=1 %to 11;
+	, max(pre_HMED_&a.) as pre_HMED_&a., max(preg_HMED_&a.) as preg_HMED_&a., max(post_HMED_&a.) as post_HMED_&a.
+	, max(TM1_HMED_&a.) as TM1_HMED_&a., max(TM2_HMED_&a.) as TM2_HMED_&a., max(TM3_HMED_&a.) as TM3_HMED_&a.
+%end;
+%do B=1 %to 4;
+	, max(TM1_EXP_&B.) as TM1_EXP_&B., max(TM2_EXP_&B.) as TM2_EXP_&B., max(TM3_EXP_&B.) as TM3_EXP_&B.
+%end;
+from tmp_2
+group by patid, pregstart, db
+;quit;
+%MEND; %XXX;
+proc stdize data=tmp_3  out=tmp_4 reponly missing=0; run;
+data x.cht_char2; set tmp_4; run;
+
+proc tabulate data=x.cht_char2;
+var age;
+class preg_hmed prehtn bp pre_hmed tm1_hmed tm2_hmed tm3_hmed post_hmed pre_hmed_1 pre_hmed_2 pre_hmed_3 pre_hmed_4 pre_hmed_5 pre_hmed_6 pre_hmed_7 pre_hmed_8 pre_hmed_9 pre_hmed_10 pre_hmed_11;
+table 
+(all)*N
+(age)*(mean std median q1 q3)
+(bp prehtn pre_hmed tm1_hmed tm2_hmed tm3_hmed post_hmed pre_hmed_1 pre_hmed_2 pre_hmed_3 pre_hmed_4 pre_hmed_5 pre_hmed_6 pre_hmed_7 pre_hmed_8 pre_hmed_9 pre_hmed_10 pre_hmed_11)*N
+, (all preg_hmed);
+run;
+
+proc tabulate data=x.cht_char2;
+var preg_hmed pre_hmed tm1_hmed tm2_hmed tm3_hmed post_hmed 
+	pre_hmed_1 pre_hmed_2 pre_hmed_3 pre_hmed_4 pre_hmed_5 pre_hmed_6 pre_hmed_7 pre_hmed_8 pre_hmed_9 pre_hmed_10 pre_hmed_11
+	tm1_hmed_1 tm1_hmed_2 tm1_hmed_3 tm1_hmed_4 tm1_hmed_5 tm1_hmed_6 tm1_hmed_7 tm1_hmed_8 tm1_hmed_9 tm1_hmed_10 tm1_hmed_11
+	tm2_hmed_1 tm2_hmed_2 tm2_hmed_3 tm2_hmed_4 tm2_hmed_5 tm2_hmed_6 tm2_hmed_7 tm2_hmed_8 tm2_hmed_9 tm2_hmed_10 tm2_hmed_11
+	tm3_hmed_1 tm3_hmed_2 tm3_hmed_3 tm3_hmed_4 tm3_hmed_5 tm3_hmed_6 tm3_hmed_7 tm3_hmed_8 tm3_hmed_9 tm3_hmed_10 tm3_hmed_11
+	post_hmed_1 post_hmed_2 post_hmed_3 post_hmed_4 post_hmed_5 post_hmed_6 post_hmed_7 post_hmed_8 post_hmed_9 post_hmed_10 post_hmed_11
+;
+table 
+(all)*N
+(pre_hmed tm1_hmed tm2_hmed tm3_hmed post_hmed 
+	pre_hmed_1 pre_hmed_2 pre_hmed_3 pre_hmed_4 pre_hmed_5 pre_hmed_6 pre_hmed_7 pre_hmed_8 pre_hmed_9 pre_hmed_10 pre_hmed_11
+	tm1_hmed_1 tm1_hmed_2 tm1_hmed_3 tm1_hmed_4 tm1_hmed_5 tm1_hmed_6 tm1_hmed_7 tm1_hmed_8 tm1_hmed_9 tm1_hmed_10 tm1_hmed_11
+	tm2_hmed_1 tm2_hmed_2 tm2_hmed_3 tm2_hmed_4 tm2_hmed_5 tm2_hmed_6 tm2_hmed_7 tm2_hmed_8 tm2_hmed_9 tm2_hmed_10 tm2_hmed_11
+	tm3_hmed_1 tm3_hmed_2 tm3_hmed_3 tm3_hmed_4 tm3_hmed_5 tm3_hmed_6 tm3_hmed_7 tm3_hmed_8 tm3_hmed_9 tm3_hmed_10 tm3_hmed_11
+	post_hmed_1 post_hmed_2 post_hmed_3 post_hmed_4 post_hmed_5 post_hmed_6 post_hmed_7 post_hmed_8 post_hmed_9 post_hmed_10 post_hmed_11
+)*(sum)
+, (all);
+run;
+
+/*proc sql;*/
+/*create table tmp_1 as*/
+/*select distinct a.patid, a.pregstart, a.pregend, a.db, b.rx_dt, b.type_id, b.exp_id, b.ingr*/
+/*from x.cht_char2 as a*/
+/*left join x.rx_cht_htnmed as b on a.patid=b.patid and a.pregstart=b.pregstart and a.db=b.db*/
+/*where a.pre_hmed=1*/
+/*;quit;*/
+
+proc sql;
+create table tmp_2 as
+select distinct a.patid, a.pregstart, a.pregend, a.db
+	, b.type_id as pre_class, b.ingr as pre_ingr
+from x.cht_char2 as a
+left join x.rx_cht_htnmed as b on a.patid=b.patid and a.pregstart=b.pregstart and a.db=b.db
+	and a.pregstart-90 <= b.rx_dt and b.rx_dt <= a.pregstart
+where a.pre_hmed=1
+group by a.patid, a.pregstart, a.db
+having b.rx_dt=max(b.rx_dt)
+;quit;
+proc sql;
+create table tmp_3 as
+select distinct *, count(distinct pre_class) as pre_n_class
+from tmp_2
+group by patid, pregstart, db
+order by patid, pregstart, db, pre_class
+;quit;
+proc sql;
+create table tmp_4 as
+select distinct a.*
+	, b.type_id as tm1_class, b.exp_id as tm1_intrx, b.ingr as tm1_ingr
+	, c.type_id as check_class, c.ingr as check_ingr
+from tmp_3 as a
+left join x.rx_cht_htnmed as b on a.patid=b.patid and a.pregstart=b.pregstart and a.db=b.db
+	and a.pregstart+1 <= b.rx_dt and b.rx_dt <= a.pregstart+90
+left join x.rx_cht_htnmed as C on a.patid=C.patid and a.pregstart=C.pregstart and a.db=C.db
+	and c.rx_dt= b.rx_dt and a.pre_class=C.type_id
+group by a.patid, a.pregstart, a.db
+having b.rx_dt=max(b.rx_dt)
+order by a.patid, a.pregstart, a.db, a.pre_class
+;quit;
+proc sql;
+create table tmp_5 as
+select distinct *, count(distinct tm1_class) as tm1_n_class, count(distinct check_class) as check_n_class
+from tmp_4
+group by patid, pregstart, db
+;quit;
+/*data test;*/
+/*set tmp_5;*/
+/*if tm1_n_class^=check_n_class;*/
+/*run;*/
+data tmp_6;
+set tmp_5;
+if tm1_intrx="EXP_1" then labe=1; else labe=0;
+if tm1_intrx="EXP_2" then nife=1; else nife=0;
+if tm1_intrx="EXP_3" then meth=1; else meth=0;
+if tm1_intrx="EXP_4" then hydr=1; else hydr=0;
+if tm1_n_class=0 then patt_trt=2;
+else if tm1_n_class^=pre_n_class then patt_trt=3;
+else if tm1_n_class=pre_n_class then do;
+	if pre_n_class=check_n_class then patt_trt=1;
+	else patt_trt=3;
+end;
 run;
 proc sql;
-create table x.cht_htnmed_gold as
-select a.*, b.eventdate as rx_dt, b.type_id, b.exp_id, b.info, b.ingr
-from tmp_1 as a
-left join x.rx_htnmed_gold as b on a.patid=b.patid
-	and a.pre_stt_dt <= b.eventdate and b.eventdate <= a.post_end_dt
+create table tmp_7 as
+select distinct a.patid, a.pregstart, a.pregend, a.db 
+	, b.pre_class, b.pre_ingr, b.pre_n_class
+	, b.patt_trt as tm1_patt, labe, nife, meth, hydr
+from x.cht_char2 as a
+left join tmp_6 as b on a.patid=b.patid and a.pregstart=b.pregstart and a.db=b.db
+where a.pre_hmed=1
+;quit;
+data tmp_8;
+set tmp_7;
+if tm1_patt=3 then do;
+if labe=1 then tm1_labe=1; else tm1_labe=0;
+if nife=1 then tm1_nife=1; else tm1_nife=0;
+if meth=1 then tm1_meth=1; else tm1_meth=0;
+if hydr=1 then tm1_hydr=1; else tm1_hydr=0;
+if max(tm1_labe, tm1_nife, tm1_meth, tm1_hydr)=0 then tm1_oth=1; else tm1_oth=0;
+drop labe nife meth hydr;
+end;
+run;
+
+proc sql;
+create table tmp_9 as
+select distinct a.*
+	, b.type_id as tm2_class, b.exp_id as tm2_intrx, b.ingr as tm2_ingr
+	, c.type_id as check_class, c.ingr as check_ingr
+from tmp_8 as a
+left join x.rx_cht_htnmed as b on a.patid=b.patid and a.pregstart=b.pregstart and a.db=b.db
+	and a.pregstart+91 <= b.rx_dt and b.rx_dt <= a.pregstart+180
+left join x.rx_cht_htnmed as C on a.patid=C.patid and a.pregstart=C.pregstart and a.db=C.db
+	and c.rx_dt= b.rx_dt and a.pre_class=C.type_id
+
+group by a.patid, a.pregstart, a.db
+having b.rx_dt=max(b.rx_dt)
+order by a.patid, a.pregstart, a.db, a.pre_class
 ;quit;
 proc sql;
-create table x.cht_htnmed_aurum as
-select a.*, b.issuedate as rx_dt, b.type_id, b.exp_id, b.info, b.ingr
-from tmp_2 as a
-left join x.rx_htnmed_aurum as b on a.patid=b.patid
-	and a.pre_stt_dt <= b.issuedate and b.issuedate <= a.post_end_dt
+create table tmp_10 as
+select distinct *, count(distinct tm2_class) as tm2_n_class
+	, count(distinct check_class) as check_n_class
+from tmp_9
+group by patid, pregstart, db
+;quit;
+data tmp_11;
+set tmp_10;
+if tm2_intrx="EXP_1" then labe=1; else labe=0;
+if tm2_intrx="EXP_2" then nife=1; else nife=0;
+if tm2_intrx="EXP_3" then meth=1; else meth=0;
+if tm2_intrx="EXP_4" then hydr=1; else hydr=0;
+if tm2_n_class=0 then patt_trt=2;
+else if tm2_n_class^=pre_n_class then patt_trt=3;
+else if tm2_n_class=pre_n_class then do;
+	if pre_n_class=check_n_class then patt_trt=1;
+	else patt_trt=3;
+end;
+run;
+proc sql;
+create table tmp_12 as
+select distinct a.patid, a.pregstart, a.pregend, a.db
+	, b.pre_class, b.pre_ingr, b.pre_n_class, tm1_patt, tm1_labe, tm1_nife, tm1_meth, tm1_hydr, tm1_oth
+	, b.patt_trt as tm2_patt, labe, nife, meth, hydr
+from x.cht_char2 as a
+left join tmp_11 as b on a.patid=b.patid and a.pregstart=b.pregstart and a.db=b.db
+where a.pre_hmed=1
+;quit;
+data tmp_13;
+set tmp_12;
+if tm2_patt=3 then do;
+if labe=1 then tm2_labe=1; else tm2_labe=0;
+if nife=1 then tm2_nife=1; else tm2_nife=0;
+if meth=1 then tm2_meth=1; else tm2_meth=0;
+if hydr=1 then tm2_hydr=1; else tm2_hydr=0;
+if max(tm2_labe, tm2_nife, tm2_meth, tm2_hydr)=0 then tm2_oth=1; else tm2_oth=0;
+drop labe nife meth hydr;
+end;
+run;
+proc stdize data=tmp_13 out=tmp_14 reponly missing=0; run;
+
+proc sql;
+create table tmp_15 as
+select distinct patid, pregstart, pregend, db, tm1_patt
+	, max(tm1_labe) as tm1_labe 
+	, max(tm1_nife) as tm1_nife
+	, max(tm1_meth) as tm1_meth 
+	, max(tm1_hydr) as tm1_hydr
+	, max(tm1_oth) as tm1_oth
+	, tm2_patt
+	, max(tm2_labe) as tm2_labe 
+	, max(tm2_nife) as tm2_nife
+	, max(tm2_meth) as tm2_meth 
+	, max(tm2_hydr) as tm2_hydr
+	, max(tm2_oth) as tm2_oth
+from tmp_14
+group by patid, pregstart, db
+;quit; *52404;
+data tmp_16;
+set tmp_15;
+tm1_int_comb=sum(tm1_labe,tm1_nife,tm1_meth,tm1_hydr);
+tm2_int_comb=sum(tm2_labe,tm2_nife,tm2_meth,tm2_hydr);
+run;
+data x.cht_char3; set tmp_16; run;
+
+proc tabulate data=x.cht_char3;
+class tm1_patt tm1_labe tm1_nife tm1_meth tm1_hydr tm1_oth tm1_int_comb 
+	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb;
+table (all tm1_patt tm1_labe tm1_nife tm1_meth tm1_hydr tm1_oth tm1_int_comb
+	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb)*(N), all;
+run;
+
+
+proc sql;
+create table tmp_17 as
+select distinct a.patid, a.pregstart, a.pregend, a.db
+	, b.type_id as pre_class
+	, c.*
+from x.cht_char2 as a
+left join x.rx_cht_htnmed as b on a.patid=b.patid and a.pregstart=b.pregstart and a.db=b.db
+	and a.pregstart-90 <= b.rx_dt and b.rx_dt <= a.pregstart
+left join x.cht_char3 as c on a.patid=c.patid and a.pregstart=c.pregstart and a.db=c.db
+where a.pre_hmed=1
+group by a.patid, a.pregstart, a.db
+having b.rx_dt=max(b.rx_dt)
 ;quit;
 
-
-
+proc tabulate data=tmp_17;
+class pre_class tm1_patt tm1_labe tm1_nife tm1_meth tm1_hydr tm1_oth tm1_int_comb 
+	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb;
+table (all tm1_patt tm1_labe tm1_nife tm1_meth tm1_hydr tm1_oth tm1_int_comb
+	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb)*(N), (all pre_class);
+run;
 
 
 *);*/;/*'*/ /*"*/; %MEND;run;quit;;;;;

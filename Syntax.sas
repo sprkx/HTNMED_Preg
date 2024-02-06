@@ -387,7 +387,7 @@ create table tmp_2 as
 select distinct a.*, b.eventdate, c.info, c.term
 from x.gold_incl_0 as a
 inner join a.gold_clinical as b on a.patid=b.patid
-	and a.pregstart-90 <= b.eventdate and b.eventdate <= a.pregstart
+	and a.pregstart-180 <= b.eventdate and b.eventdate <= a.pregstart
 inner join x.list_dx_htn as c on b.medcode=c.code and c.code_sys="gold"
 ;quit;
 proc sql;
@@ -400,9 +400,10 @@ left join tmp_2 as b on a.patid=b.patid and a.pregid=b.pregid
 data tmp_4;
 set tmp_3;
 if info^="" then preHTN=1; else preHTN=0;
-if mdy(1,1,2001)<=pregstart<=mdy(12,31,2021);
-run;*1303919;
+if mdy(1,1,2001)<=pregstart<=mdy(12,31,2020);
+run;*1303120;
 data x.gold_cht; set tmp_4; run;
+
 
 /*aurum*/
 proc sql;
@@ -428,7 +429,7 @@ create table tmp_7 as
 select distinct a.*, b.obsdate as eventdate, c.info, c.term
 from x.aurum_incl_0 as a
 inner join a.aurum_observation as b on a.patid=b.patid
-	and a.pregstart-90 <= b.obsdate and b.obsdate <= a.pregstart
+	and a.pregstart-180 <= b.obsdate and b.obsdate <= a.pregstart
 inner join x.list_dx_htn as c on b.medcodeid=c.code and c.code_sys="aurum"
 ;quit;
 proc sql;
@@ -440,8 +441,8 @@ left join tmp_7 as b on a.patid=b.patid and a.pregstart=b.pregstart
 data tmp_9;
 set tmp_8;
 if info^="" then preHTN=1; else preHTN=0;
-if mdy(1,1,2001)<=pregstart<=mdy(12,31,2021);
-run; *2840091;
+if mdy(1,1,2001)<=pregstart<=mdy(12,31,2020);
+run; *2789480;
 proc freq data=tmp_9; table prehtn; run;
 data x.aurum_cht; set tmp_9; run;
 
@@ -533,6 +534,8 @@ select a.*, b.*
 from a.aurum_drug as a
 inner join x.list_rx as b on a.prodcodeid=b.code and b.code_sys="aurum"
 ;quit;
+proc contents data=x.gold_rx_htnmed; run;
+proc contents data=x.aurum_rx_htnmed; run;
 
 proc sql;
 create table tmp as
@@ -541,6 +544,8 @@ select a.*, COALESCE(b.eventdate,c.issuedate) as rx_dt format yymmdd10.
 	, COALESCE(b.exp_id, c.exp_id) as exp_id
 	, COALESCE(b.info, c.info) as info
 	, COALESCE(b.ingr, c.ingr) as ingr
+/*	, COALESCE(b.qty, c.quantity) as qty*/
+/*	, COALESCE(b., c.duration) as rx_dur*/
 from x.cht_char1 as a
 left join x.gold_rx_htnmed as b on a.patid=b.patid
 	and a.pregstart-365 <= b.eventdate and b.eventdate <= a.pregend+365
@@ -625,6 +630,7 @@ select distinct patid, pregstart, pregend, yob, prehtn, bp, age, db
 %do B=1 %to 4;
 	, max(TM1_EXP_&B.) as TM1_EXP_&B., max(TM2_EXP_&B.) as TM2_EXP_&B., max(TM3_EXP_&B.) as TM3_EXP_&B.
 %end;
+	, max(TM1_EXP_9) as TM1_EXP_9, max(TM2_EXP_9) as TM2_EXP_9, max(TM3_EXP_9) as TM3_EXP_9
 from tmp_2
 group by patid, pregstart, db
 ;quit;
@@ -634,11 +640,13 @@ data x.cht_char2; set tmp_4; run;
 
 proc tabulate data=x.cht_char2;
 var age;
-class preg_hmed prehtn bp pre_hmed tm1_hmed tm2_hmed tm3_hmed post_hmed pre_hmed_1 pre_hmed_2 pre_hmed_3 pre_hmed_4 pre_hmed_5 pre_hmed_6 pre_hmed_7 pre_hmed_8 pre_hmed_9 pre_hmed_10 pre_hmed_11;
+class preg_hmed prehtn bp pre_hmed tm1_hmed tm2_hmed tm3_hmed post_hmed 
+pre_hmed_1 pre_hmed_2 pre_hmed_3 pre_hmed_4 pre_hmed_5 pre_hmed_6 pre_hmed_7 pre_hmed_8 pre_hmed_9 pre_hmed_10 pre_hmed_11;
 table 
 (all)*N
 (age)*(mean std median q1 q3)
-(bp prehtn pre_hmed tm1_hmed tm2_hmed tm3_hmed post_hmed pre_hmed_1 pre_hmed_2 pre_hmed_3 pre_hmed_4 pre_hmed_5 pre_hmed_6 pre_hmed_7 pre_hmed_8 pre_hmed_9 pre_hmed_10 pre_hmed_11)*N
+(bp prehtn pre_hmed tm1_hmed tm2_hmed tm3_hmed post_hmed 
+pre_hmed_1 pre_hmed_2 pre_hmed_3 pre_hmed_4 pre_hmed_5 pre_hmed_6 pre_hmed_7 pre_hmed_8 pre_hmed_9 pre_hmed_10 pre_hmed_11)*N
 , (all preg_hmed);
 run;
 
@@ -646,8 +654,11 @@ proc tabulate data=x.cht_char2;
 var preg_hmed pre_hmed tm1_hmed tm2_hmed tm3_hmed post_hmed 
 	pre_hmed_1 pre_hmed_2 pre_hmed_3 pre_hmed_4 pre_hmed_5 pre_hmed_6 pre_hmed_7 pre_hmed_8 pre_hmed_9 pre_hmed_10 pre_hmed_11
 	tm1_hmed_1 tm1_hmed_2 tm1_hmed_3 tm1_hmed_4 tm1_hmed_5 tm1_hmed_6 tm1_hmed_7 tm1_hmed_8 tm1_hmed_9 tm1_hmed_10 tm1_hmed_11
+	tm1_exp_1 tm1_exp_2 tm1_exp_3 tm1_exp_4 tm1_exp_9
 	tm2_hmed_1 tm2_hmed_2 tm2_hmed_3 tm2_hmed_4 tm2_hmed_5 tm2_hmed_6 tm2_hmed_7 tm2_hmed_8 tm2_hmed_9 tm2_hmed_10 tm2_hmed_11
+	tm2_exp_1 tm2_exp_2 tm2_exp_3 tm2_exp_4 tm2_exp_9
 	tm3_hmed_1 tm3_hmed_2 tm3_hmed_3 tm3_hmed_4 tm3_hmed_5 tm3_hmed_6 tm3_hmed_7 tm3_hmed_8 tm3_hmed_9 tm3_hmed_10 tm3_hmed_11
+	tm3_exp_1 tm3_exp_2 tm3_exp_3 tm3_exp_4 tm3_exp_9
 	post_hmed_1 post_hmed_2 post_hmed_3 post_hmed_4 post_hmed_5 post_hmed_6 post_hmed_7 post_hmed_8 post_hmed_9 post_hmed_10 post_hmed_11
 ;
 table 
@@ -655,7 +666,10 @@ table
 (pre_hmed tm1_hmed tm2_hmed tm3_hmed post_hmed 
 	pre_hmed_1 pre_hmed_2 pre_hmed_3 pre_hmed_4 pre_hmed_5 pre_hmed_6 pre_hmed_7 pre_hmed_8 pre_hmed_9 pre_hmed_10 pre_hmed_11
 	tm1_hmed_1 tm1_hmed_2 tm1_hmed_3 tm1_hmed_4 tm1_hmed_5 tm1_hmed_6 tm1_hmed_7 tm1_hmed_8 tm1_hmed_9 tm1_hmed_10 tm1_hmed_11
+	tm1_exp_1 tm1_exp_2 tm1_exp_3 tm1_exp_4 tm1_exp_9
 	tm2_hmed_1 tm2_hmed_2 tm2_hmed_3 tm2_hmed_4 tm2_hmed_5 tm2_hmed_6 tm2_hmed_7 tm2_hmed_8 tm2_hmed_9 tm2_hmed_10 tm2_hmed_11
+	tm2_exp_1 tm2_exp_2 tm2_exp_3 tm2_exp_4 tm2_exp_9
+	tm3_exp_1 tm3_exp_2 tm3_exp_3 tm3_exp_4 tm3_exp_9
 	tm3_hmed_1 tm3_hmed_2 tm3_hmed_3 tm3_hmed_4 tm3_hmed_5 tm3_hmed_6 tm3_hmed_7 tm3_hmed_8 tm3_hmed_9 tm3_hmed_10 tm3_hmed_11
 	post_hmed_1 post_hmed_2 post_hmed_3 post_hmed_4 post_hmed_5 post_hmed_6 post_hmed_7 post_hmed_8 post_hmed_9 post_hmed_10 post_hmed_11
 )*(sum)
@@ -803,8 +817,67 @@ end;
 run;
 proc stdize data=tmp_13 out=tmp_14 reponly missing=0; run;
 
+
 proc sql;
 create table tmp_15 as
+select distinct a.*
+	, b.type_id as tm3_class, b.exp_id as tm3_intrx, b.ingr as tm3_ingr
+	, c.type_id as check_class, c.ingr as check_ingr
+from tmp_14 as a
+left join x.rx_cht_htnmed as b on a.patid=b.patid and a.pregstart=b.pregstart and a.db=b.db
+	and a.pregstart+181 <= b.rx_dt and b.rx_dt <= a.pregend
+left join x.rx_cht_htnmed as C on a.patid=C.patid and a.pregstart=C.pregstart and a.db=C.db
+	and c.rx_dt= b.rx_dt and a.pre_class=C.type_id
+group by a.patid, a.pregstart, a.db
+having b.rx_dt=max(b.rx_dt)
+order by a.patid, a.pregstart, a.db, a.pre_class
+;quit;
+proc sql;
+create table tmp_16 as
+select distinct *, count(distinct tm3_class) as tm3_n_class
+	, count(distinct check_class) as check_n_class
+from tmp_15
+group by patid, pregstart, db
+;quit;
+data tmp_17;
+set tmp_16;
+if tm3_intrx="EXP_1" then labe=1; else labe=0;
+if tm3_intrx="EXP_2" then nife=1; else nife=0;
+if tm3_intrx="EXP_3" then meth=1; else meth=0;
+if tm3_intrx="EXP_4" then hydr=1; else hydr=0;
+if tm3_n_class=0 then patt_trt=2;
+else if tm3_n_class^=pre_n_class then patt_trt=3;
+else if tm3_n_class=pre_n_class then do;
+	if pre_n_class=check_n_class then patt_trt=1;
+	else patt_trt=3;
+end;
+run;
+proc sql;
+create table tmp_18 as
+select distinct a.patid, a.pregstart, a.pregend, a.db
+	, b.pre_class, b.pre_ingr, b.pre_n_class
+	, tm1_patt, tm1_labe, tm1_nife, tm1_meth, tm1_hydr, tm1_oth
+	, tm2_patt, tm2_labe, tm2_nife, tm2_meth, tm2_hydr, tm2_oth
+	, b.patt_trt as tm3_patt, labe, nife, meth, hydr
+from x.cht_char2 as a
+left join tmp_17 as b on a.patid=b.patid and a.pregstart=b.pregstart and a.db=b.db
+where a.pre_hmed=1
+;quit;
+data tmp_19;
+set tmp_18;
+if tm3_patt=3 then do;
+if labe=1 then tm3_labe=1; else tm3_labe=0;
+if nife=1 then tm3_nife=1; else tm3_nife=0;
+if meth=1 then tm3_meth=1; else tm3_meth=0;
+if hydr=1 then tm3_hydr=1; else tm3_hydr=0;
+if max(tm3_labe, tm3_nife, tm3_meth, tm3_hydr)=0 then tm3_oth=1; else tm3_oth=0;
+drop labe nife meth hydr;
+end;
+run;
+proc stdize data=tmp_19 out=tmp_20 reponly missing=0; run;
+
+proc sql;
+create table tmp_21 as
 select distinct patid, pregstart, pregend, db, tm1_patt
 	, max(tm1_labe) as tm1_labe 
 	, max(tm1_nife) as tm1_nife
@@ -817,44 +890,57 @@ select distinct patid, pregstart, pregend, db, tm1_patt
 	, max(tm2_meth) as tm2_meth 
 	, max(tm2_hydr) as tm2_hydr
 	, max(tm2_oth) as tm2_oth
-from tmp_14
+	, tm3_patt
+	, max(tm3_labe) as tm3_labe 
+	, max(tm3_nife) as tm3_nife
+	, max(tm3_meth) as tm3_meth 
+	, max(tm3_hydr) as tm3_hydr
+	, max(tm3_oth) as tm3_oth
+from tmp_20
 group by patid, pregstart, db
 ;quit; *52404;
-data tmp_16;
-set tmp_15;
+data tmp_22;
+set tmp_21;
 tm1_int_comb=sum(tm1_labe,tm1_nife,tm1_meth,tm1_hydr);
 tm2_int_comb=sum(tm2_labe,tm2_nife,tm2_meth,tm2_hydr);
+tm3_int_comb=sum(tm3_labe,tm3_nife,tm3_meth,tm3_hydr);
 run;
-data x.cht_char3; set tmp_16; run;
+data x.cht_char3_1; set tmp_22; run;
 
-proc tabulate data=x.cht_char3;
+proc tabulate data=x.cht_char3_1;
 class tm1_patt tm1_labe tm1_nife tm1_meth tm1_hydr tm1_oth tm1_int_comb 
-	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb;
+	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb
+	tm3_patt tm3_labe tm3_nife tm3_meth tm3_hydr tm3_oth tm3_int_comb;
 table (all tm1_patt tm1_labe tm1_nife tm1_meth tm1_hydr tm1_oth tm1_int_comb
-	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb)*(N), all;
+	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb
+	tm3_patt tm3_labe tm3_nife tm3_meth tm3_hydr tm3_oth tm3_int_comb)*(N), all;
 run;
-
 
 proc sql;
-create table tmp_17 as
+create table tmp_23 as
 select distinct a.patid, a.pregstart, a.pregend, a.db
 	, b.type_id as pre_class
 	, c.*
 from x.cht_char2 as a
 left join x.rx_cht_htnmed as b on a.patid=b.patid and a.pregstart=b.pregstart and a.db=b.db
 	and a.pregstart-90 <= b.rx_dt and b.rx_dt <= a.pregstart
-left join x.cht_char3 as c on a.patid=c.patid and a.pregstart=c.pregstart and a.db=c.db
+left join x.cht_char3_1 as c on a.patid=c.patid and a.pregstart=c.pregstart and a.db=c.db
 where a.pre_hmed=1
 group by a.patid, a.pregstart, a.db
 having b.rx_dt=max(b.rx_dt)
 ;quit;
 
-proc tabulate data=tmp_17;
+proc tabulate data=tmp_23;
 class pre_class tm1_patt tm1_labe tm1_nife tm1_meth tm1_hydr tm1_oth tm1_int_comb 
-	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb;
+	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb
+	tm3_patt tm3_labe tm3_nife tm3_meth tm3_hydr tm3_oth tm3_int_comb;
 table (all tm1_patt tm1_labe tm1_nife tm1_meth tm1_hydr tm1_oth tm1_int_comb
-	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb)*(N), (all pre_class);
+	tm2_patt tm2_labe tm2_nife tm2_meth tm2_hydr tm2_oth tm2_int_comb
+	tm3_patt tm3_labe tm3_nife tm3_meth tm3_hydr tm3_oth tm3_int_comb)*(N), (all pre_class);
 run;
+
+proc freq data=x.gold_incl_0; table pregstart; run;
+proc freq data=x.aurum_incl_0; table pregstart; run;
 
 
 *);*/;/*'*/ /*"*/; %MEND;run;quit;;;;;
